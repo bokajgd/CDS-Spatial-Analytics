@@ -3,7 +3,7 @@
  
 # Overview 
 
-**Jakob Grøhn Damgaard, Januray 2021** <br/>
+**Jakob Grøhn Damgaard, Feburary 2021** <br/>
 This repository contains the W1 assigmnent for the course *Spatial Analytics*
 
 # Task 1 - Example of a research problem
