@@ -5,7 +5,6 @@
 
 **Jakob Grøhn Damgaard, Januray 2021** <br/>
 This repository contains the W1 assigmnent for the course *Spatial Analytics*
-# License
 
 # Task 1 - Example of a research problem
 An field of study which implements methods and principles from spaital analysis, but does not revolve around geographic data, is eye tracking. An example of a specific eye tracking research area where spatial analysis would be to investigate visual attention behavior in children when interacting with screen technology, e.g. tablets.
