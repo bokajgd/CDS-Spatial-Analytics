@@ -25,14 +25,13 @@ print("Hello World") # This would be your code contribution
 
 # We will use the sf, raster, and tmap packages.
 # Additionally, we will use the spData and spDataLarge packages that provide new datasets. 
-# These packages have been preloaded to the worker2 workspace.
 
-library(sf)
-library(raster)
-library(tmap)
-library(spData)
-library(spDataLarge)
-
+# Uncomment and run the line below if pacman is not installed locally on your computer
+# install.packages('pacman') 
+library(pacman)
+# Uncomment and run the line below if spDataLarge is not installed locally on your computer
+#install.packages("spDataLarge", repos = "https://nowosad.github.io/drat/", type = "source")
+p_load(sf, raster, tmap, spData, spDataLarge)
 #### Data sets #### 
 
 # We will use two data sets: `srtm` and `zion`.
@@ -67,7 +66,32 @@ lc_data_masked <- mask(crop(lc_data, study_area), study_area)
 
 # /Start Code/ #
 
+### 1 ###
 
+# Plotting the object
+plot(zion)
+
+# Printing basic information about the object 'zion'
+zion 
+crs(zion) #GRS80
+
+# The 'zion' object contains vector data which represent points (X and Y coordinates) that form a polygon shape. 
+# This polygon outlines the borders of the 'Zion National Park'. The CRS system used for mapping this object is GRS80.
+# The data object contains 1 feature and 11 fields.
+
+
+
+### 2 ###
+# Plotting the object
+plot(srtm)
+
+# Printing basic information
+srtm
+
+# The 'srtm' object is a raster data file which contains data on the elevation above sea level of the area in and around 'Zion National Park'-
+# The resolution of the raster object is 0.0008333333, 0.0008333333  (x, y).
+# The dimensions are 457 x 465 x 1. From this, it is clear that the raster only has one colour channel.
+# The object uses the WGS84 CSR system
 
 # /End Code/ #
 
@@ -83,8 +107,20 @@ lc_data_masked <- mask(crop(lc_data, study_area), study_area)
 
 # Your solution
 
-# /Start Code/ #
+### 1 ###
 
+# /Start Code/ #
+zion_crs <- crs(zion, asText = TRUE) # Get the CRS from the 'zion' object
+srtm2 <- projectRaster(srtm, crs = zion_crs) # Project 'srtm' to the 'zion' CRS
+plot(srtm) # Plot the original 'strm'
+plot(srtm2) # Plot the new 'strm'
+
+### 2 ###
+
+srtm_crs <- crs(srtm, asText = TRUE)  # Get the CRS from the 'srtm' object
+zion2 <- st_transform(zion, crs = srtm_crs) # Project 'zion' to the 'srtm'  # Get the CRS from the 'zion' object
+plot(zion, max.plot = 11) # Plo the original 'zion'.
+plot(zion2, max.plot = 11) # Plot the new 'zion'.
 
 
 # /End Code/ #

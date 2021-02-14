@@ -74,23 +74,27 @@ tm_shape(nz_elev)  +
 
 # /Start Code/ #
 
+# Plotting updated map
 tm_shape(nz_elev)  +
-  tm_raster(title = "Elevation (m ASL)", 
+  tm_raster(title = "Elevation (m ASL)         ", 
             style = "cont",
             palette = "RdYlGn") +
+  tm_layout(scale = 1, legend.title.siz = 1, # Making frame for legend
+            legend.bg.color = "white", legend.bg.alpha = .6, 
+            legend.frame = "gray50")+ 
   tm_shape(nz) +
   tm_borders(col = "black", 
              lwd = 1.5) +
-  tm_scale_bar(breaks = seq(0, 250, by = 50),
+  tm_scale_bar(breaks = seq(0, 250, by = 50), # Sequence of numbers from 0 - 250 with a jump of 50
                text.size = 0.5,
-               position = c(0.705, 0.04)) +
+               position = c(0.705, 0.04)) + # Setting position according to self-defined  coordinates 
   tm_compass(position = c("RIGHT", "top"),
              type = "rose", 
              size = 2) +
   tm_credits(text = "Jakob G. Damgaard, Feburary, 2021",
-             position = c(0.51, 0.01)) +
+             position = c(0.51, 0.01)) + # Setting position according to self-defined coordinates 
   tm_layout(main.title = "New Zealand",
-            bg.color = "#C1CAEB",
+            bg.color = "#C1CAEB", # Colour represents water
             inner.margins = c(0, 0, 0, 0))
 
 # /End Code/ #
@@ -107,13 +111,14 @@ zion = read_sf(system.file("vector/zion.gpkg", package = "spDataLarge"))
 
 # /Start Code/ #
 
+# Plotting a new map of Zion National Park
 tm_shape(srtm)  +
   tm_raster(title = "Elevation (m ASL)        ", 
             breaks= seq(1000, 3000, by = 500),
             style = "cont",
             palette = "RdYlGn") +
   tm_layout(scale = 1, 
-            legend.position = c(0.6, 0.85), legend.title.siz = 1,
+            legend.position = c(0.6, 0.85), legend.title.siz = 1,  # Making frame for legend
             legend.bg.color = "white", legend.bg.alpha = .6, 
             legend.frame = "gray50")+ 
   tm_shape(zion) +
