@@ -1,4 +1,4 @@
-# W1 - Basic Coding with Map Data
+# W2 - Basic Coding with Map Data
 
 # Overview 
 
