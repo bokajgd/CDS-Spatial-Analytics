@@ -84,7 +84,7 @@ tm_shape(nz_elev)  +
             legend.frame = "gray50")+ 
   tm_shape(nz) +
   tm_borders(col = "black", 
-             lwd = 1.5) +
+             lwd = 1.25) +
   tm_scale_bar(breaks = seq(0, 250, by = 50), # Sequence of numbers from 0 - 250 with a jump of 50
                text.size = 0.5,
                position = c(0.705, 0.04)) + # Setting position according to self-defined  coordinates 
