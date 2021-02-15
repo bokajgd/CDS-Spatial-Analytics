@@ -95,7 +95,7 @@ tm_shape(nz_elev)  +
              position = c(0.51, 0.01)) + # Setting position according to self-defined coordinates 
   tm_layout(main.title = "New Zealand",
             bg.color = "#C1CAEB", # Colour represents water
-            inner.margins = c(0, 0, 0, 0))
+            inner.margins = c(0.05, 0.05, 0.05, 0.05)) # Zooming slightly out
 
 # /End Code/ #
 
