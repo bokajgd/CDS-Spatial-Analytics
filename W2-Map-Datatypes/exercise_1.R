@@ -78,7 +78,7 @@ tm_shape(nz_elev)  +
 tm_shape(nz_elev)  +
   tm_raster(title = "Elevation (m ASL)         ", 
             style = "cont",
-            palette = "RdYlGn") +
+            palette = "-RdYlGn") +
   tm_layout(scale = 1, legend.title.siz = 1, # Making frame for legend
             legend.bg.color = "white", legend.bg.alpha = .6, 
             legend.frame = "gray50")+ 
@@ -116,7 +116,7 @@ tm_shape(srtm)  +
   tm_raster(title = "Elevation (m ASL)        ", 
             breaks= seq(1000, 3000, by = 500),
             style = "cont",
-            palette = "RdYlGn") +
+            palette = "-RdYlGn") +
   tm_layout(scale = 1, 
             legend.position = c(0.6, 0.85), legend.title.siz = 1,  # Making frame for legend
             legend.bg.color = "white", legend.bg.alpha = .6, 
