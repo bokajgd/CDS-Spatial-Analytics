@@ -123,7 +123,8 @@ tm_shape(srtm)  +
             legend.frame = "gray50")+ 
   tm_shape(zion) +
   tm_borders(col = "black", 
-             lwd = 1.5) +
+             lwd = 2,
+             lty = 3) + # Making border dashed
   tm_scale_bar(breaks = seq(0, 10, by = 2),
                text.size = 0.75,
                position = c(0.03, 0.04)) +
