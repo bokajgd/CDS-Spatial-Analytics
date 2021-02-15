@@ -82,7 +82,7 @@ BlueMounatains_map_with_markers
 BlueMounatains_map_with_clustering <- BlueMounatains_map %>% 
   addTiles() %>% 
   addMarkers(lng = data$Longitude, 
-             lat = data$Latitude,s
+             lat = data$Latitude,
              popup = paste("ID:", data$FeatureID, "<br/>",
                            "Type:", data$FeatureType, "<br/>",
                            "Description:", data$Description,"<br/>",
@@ -98,4 +98,4 @@ saveWidget(BlueMounatains_map_with_markers, "Interactive-Map.html", selfcontaine
 
 #### CONCLUSION ####
 # Clustering the individual locations together provides makes the map more visually pleasing as many points are chaotically located close together. 
-# However, applying this funciton makes it impossible to see the exact location of each point and, therefore, I would not recommend it.
+# However, applying this function makes it impossible to see the exact location of each point and, therefore, I would not recommend it.
