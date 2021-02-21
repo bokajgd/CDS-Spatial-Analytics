@@ -1,7 +1,7 @@
 ---
 title: "Ancient cities and inscriptions"
-author: "Adela Sobotkova"
-date: "13/01/2021 updated `r format(Sys.time(), '%B %d, %Y')`" 
+author: "Jakob Grøhn Damgaard"
+date: "`r format(Sys.time(), '%B %d, %Y')`" 
 output:
   rmdformats::readthedown:
   highlight: kate
@@ -12,6 +12,10 @@ editor_options:
 ```{r setup, include=FALSE}
 library(knitr)
 library(rmdformats)
+#install.packages("formatR") # Uncomment if package is missing
+library(formatR)
+# install.packages("tidytext") # Uncomment if package is missing
+library(tidytext)
 
 ## Global options
 options(max.print="75")
@@ -39,21 +43,21 @@ John Hanson has created a dataset of all cities in the ancient Mediterranean and
 
 * Use `read_csv()` to load `Hanson2016_Cities_OxREP.csv` dataset from the provided URL and assign it to `cities` object
 
-```{r load-cities, eval=FALSE}
+```{r}
 cities <- as.data.frame(read_csv("http://oxrep.classics.ox.ac.uk/oxrep/docs/Hanson2016/Hanson2016_Cities_OxREP.csv"))
 ```
 
 
 ... then reproject this data to EPSG 3035
-```{r prj-cities, eval=FALSE}
+```{r}
 # Convert the table into an sf object on the basis of X and Y columns
 cities_sf <- st_as_sf(cities, coords = c("Longitude (X)", "Latitude (Y)"))
 
 # Define the projection of Lat/Long coordinates as EPSG 4326
-cities_sf4326<- st_set_crs(cities_sf, 4326)
+cities_sf4326 <- st_set_crs(cities_sf, 4326)
 
 # Transform the projection to a 2D projection using EPSG 3035
-cities_sf3035<- st_transform(cities_sf4326, crs = 3035)
+cities_sf3035 <- st_transform(cities_sf4326, crs = 3035)
 
 # Verify the projection is 'projected' not 'geographic'
 st_crs(cities_sf3035)  # The output displays 'PROJCRS' meaning that the data has been projected
@@ -74,7 +78,7 @@ As each city and inscription corresponds to a dot on the map, the best way to gr
 * Create a buffer around the projected `cities` geometry with `st_buffer()` , setting the `dist` argument to the desired radius of 5000m.
 * Plot the resulting buffer with city on top for quick review. 
 
-```{r buff, eval=FALSE}
+```{r}
 # Make buffer of 5 km. Check the units of your object to correctly assign value to dist
 cities_5km<- st_buffer(cities_sf3035, dist = 5000)
 
@@ -91,7 +95,7 @@ Well, a quick review may look ok, but you cannot be sure your buffers work well 
 * Grab the first 10 cities and buffers with slice() function
 * Load tmap package and plot the 10 cities and buffers with a scale of 0,10,20km. Add names and background for clarity. Do your buffers span 10km across or do they span the universe? (If the latter, recheck your CRS, units, and dist argument)
 
-```{r tmap, eval=FALSE}
+```{r}
 # Grab the first 10 elements in the sf object and the buffer
 ten_buffers <- cities_5km %>% slice(1:10)
 ten_cities <- cities_sf3035 %>% slice(1:10)
@@ -138,7 +142,7 @@ The json dataset is hefty with some 12 thousand inscriptions and 74 variables. C
 * Check the column names looking for something that holds spatial data. There should be a `coordinates` column. Look at the column whether it holds meaningful coordinates.
 * Separate the two values inside single coordinate column and create a separate longitude and a latitude column, which contain clean decimal numbers. You will need to clean up non-numeric characters en route. Make sure to keep the decimal point. Hint: there are lots of ways of getting clean decimal coordinates into two new columns, so feel free to diverge from the suggested course. Check out the `gsub()`, `grep()` and `str_extract()` functions to implement regular expressions in tidyverse pipeline. 
 
-```{r inscriptions, eval=FALSE}
+```{r}
 # Libraries
 library(tidyverse)
 library(jsonlite)
@@ -194,7 +198,7 @@ Now that the hard work is done, let's apply the wrangling to the full dataset an
 * Make the resulting `inscriptions` tibble into an sf object using the newly created and cleaned longitude and latitude column in the `coords` argument. The CRS of the data is 4326.
 * Plot your data using st_geometry()
 
-```{r insc-sf, eval=FALSE}
+```{r}
 # Applying code from former chunch to all the data
 i <- inscriptions %>% 
   filter(coordinates != "list()") %>% # Removing rows with missing coordinates
@@ -230,7 +234,7 @@ To reduce the computational intensity of the final intersection, it is a good id
 * Use `st_intersection()` to clip the inscriptions that fall within the buffer object and assign to `insc_urban` object
 * Use `st_difference` flag to select inscriptions outside these buffers and create `insc_rural` object
 
-```{r intersection, eval=FALSE}
+```{r}
 # Project the sf object into EPSG3035 so it is consistent with cities and their buffers
 insc_sf3035 <- st_transform(insc_sf4326, crs = 3035)
 
@@ -245,16 +249,18 @@ cities_it <- st_intersection(insc_ch, cities_5km)
 c_buff <- st_union(cities_it)
 
 # Calculate the number of inscriptions in urban and rural areas. This may take a couple seconds
-insc_urban <- st_difference(insc_sf3035, c_buff)
+insc_urban <- st_intersection(insc_sf3035, c_buff)
 insc_rural <- st_difference(insc_sf3035, c_buff)
 ```
 
 ### Question 3: 
 *What is the ratio of urban to rural inscriptions?*
 ```{r}
+# Dividing the number of inscriptions in the rural areas with the number of incriptions within the cities
 length(insc_urban$id)/length(insc_rural$id)
 ```
-
+<br>
+There are approximately 6.5 times more inscriptions in the cities compared to the rural areas of Italy.
  
 # Task 7: CHALLENGE - Duplicates and average distance 
 
