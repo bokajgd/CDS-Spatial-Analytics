@@ -5,7 +5,7 @@
 This repository contains the W4 assigmnent for the course *Spatial Analytics*
 
 # Code
-The code to execute the tasks can be found in the files *CitiesInscriptions_exercise.Rmd*<br/>
+The code to execute the tasks can be found in the files *SA12_CanopyExercise.Rmd*<br/>
 <br/>
 # Download folder locally
 To locally download a compressed zip version of this repository, one can zip the entire repository from GitHub by navigating back to the home page of the repository and clicking the *Code* button and then *Download ZIP*. <br/>
