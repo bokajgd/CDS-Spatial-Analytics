@@ -7,10 +7,9 @@ This repository contains the W5 assignment for the course *Spatial Analytics*
 # Code
 The code to execute the tasks can be found in the files *W5-Kazalnak-Valley.Rmd*<br/>
 A HTML rendered version of the markdown can be found in the file *W5-Kazalnak-Valley.html* <br/>
-<br/>
+
 # Data
 All the necessary data files are located in the *data* folder. <br>
-<br>
 
 Data: 
 - Aster.tif: A digital elevation map of the Kazalnak Valley
