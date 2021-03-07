@@ -1,0 +1,145 @@
+---
+title: "W5-Kazalnak-Valley"
+author: "Jakob Grøhn Damgaard"
+date: "3/5/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Task 1: Analyze burial mound health
+A number of factors can negatively affect cultural heritage, from natural post-depositional processes, such as chemical and mechanical weathering, to animal-activity and human-inflicted damage, which can be either direct (excavation, looting) or indirect (development, agricultural activities, transport). In order to understand the anthropic impacts on cultural heritage, archaeologists routinely assess the condition of different types of cultural remains. In the burial mounds dataset, the Condition column contains a professional judgment of monument health recorded on a Likert-scale from 1 to 5, where 1 means the feature is in pristine state, while 5 means it is extinct or nearly so. The 'Robbed' column, specifies via a binary value of 1/0 (corresponding to Yes/No), whether looting was detected on site. The LandUse column contains the surrounding land use, which can also relate to the condition.
+
+Design a study to evaluate direct or indirect impacts on burial mounds. You can use the provided datasets to extract a number of possible variables for this purpose:
+
+- location-related variables such as elevation, aspect, slope (are mounds on steep slopes or in lower elevations disproportionately more vulnerable? )
+- mound size (are larger mounds disproportionately affected by looters?)
+- mound proximity to roads, rivers, nearest settlement boundary or center, regional capital boundary or center (do - looters rob mounds that are closer to the settlements? are mounds near large urban centers disproportionally damaged/looted? are mounds in the vicinity of the Koprinka reservoir - the large dam in the middle of the valley, see kaz_lakes.shp - more damaged?)
+- landuse around the mound (are mounds in agricultural fields more prone to damage than mounds in the forests?)
+- Take one or more questions and elaborate it into a study using spatial operations on vector and raster.
+
+# My task:
+## Analysing the impact of ground slope on the health of burial mounds in Kazalnak Valley
+In this short study, I wish to investigate whether the slope of the landscape under and around a burial mound has a impact on the deterioration of the mound. Landscapes with severe slopes are more exposed to wind and flowing water after rain and mounds located in such terrain may, hence, deteriorate faster.
+
+```{r packages, include=FALSE}
+# Uncomment and run the line below if pacman is not locally installed 
+#install.packages("pacman")
+
+# Installing and loading needed packages
+library(pacman)
+
+pacman::p_load(tidyverse,
+               dplyr,
+               tmap,
+               rasterVis,
+               sf,
+               raster)
+```
+
+## Loading the data
+Data: 
+- Aster.tif: A digital elevation map of the Kazalnak Valley
+- KAZ_mounds: A shapefile containing the GPS coordinates of the locations of the marked burial mounds
+- KAT_mdata: Meta-data on the burial mounds containing e.g. information on health status
+
+```{r loading data }
+# Loading data files
+kaz_elevation_map <- raster("data/aster.tif")
+mound_coordinates <-  st_read("data/KAZ_mounds.shp")
+mound_attributes <- read_csv("data/KAZ_mdata.csv")
+
+# Checking whether the shapefile and raster file are aligned with the same CRS
+st_crs(mound_coordinates)
+crs(kaz_elevation_map) 
+# The CRS for both files is WGS84/UTM 35N
+```
+
+## Fixing elevation map
+The elevation map contains a large amount of missing values outside the area of interest which have been set to -999 by default. In order to handle the data file, it is necessary to start by changing these values to NAs instead.
+```{r}
+# Checking skewed data
+plot(kaz_elevation_map)
+
+# Changing negative values to NAs
+rclmat <- cbind(-10000,-1, NA)
+kaz_elevation_map <- reclassify(kaz_elevation_map, rcl = rclmat)
+
+# Checking if fix worked
+plot(kaz_elevation_map)
+```
+
+
+## Combining attributes and coordinate data
+Joining the attribute data file with the shapefile
+```{r}
+# Renaming ID column in the coordinate data frame:
+colnames(mound_coordinates)[2] <- "MoundID"
+
+# Joining data frame using merge() 
+mound_data <- merge(mound_coordinates, mound_attributes, by = "MoundID")
+```
+
+## Extracting ground slope attribute 
+The ground slopes around the mounds needs to be manually calculated from the avaliable data
+```{r}
+# Crop the raster to only include the bounding box that encapsulates all mounds
+# Creating bounding box with a border 
+mound_bbox_with_bird <-  as(extent(352481.3-2000, 371282.4+2000, 4712325-2000, 4730029+2000), 'SpatialPolygons')
+# Cropping the raster
+kaz_elevation_map_cropped <- crop(kaz_elevation_map, mound_bbox_with_bird)
+
+# Mapping the mound locations on the raster to see if everything works
+tm_shape(kaz_elevation_map_cropped)+
+  tm_raster(title = "Elevation (m ASL)")+
+  tm_shape(mound_data)+
+  tm_markers(size = 0.1)+
+  tm_scale_bar()+
+  tm_layout(main.title = "Mound locations", 
+            legend.position = c("left","bottom"), 
+            legend.bg.color = "#D6E0EA",
+            legend.bg.alpha = 0.7,
+            legend.text.size = 0.6,
+            legend.title.size = 0.75)
+
+
+# Calculating the slope of each cell
+slope_raster = terrain(kaz_elevation_map_cropped, opt='slope', unit='degrees', neighbors=8)
+
+# Mapping the mound locations on the slope raster
+tm_shape(slope_raster)+
+  tm_raster(title = "Slope in degrees")+
+  tm_shape(high_slope)+
+  tm_markers(size = 0.1)+
+  tm_scale_bar()+
+  tm_layout(main.title = "Mound locations", 
+            legend.position = c("left","bottom"), 
+            legend.bg.color = "#D6E0EA",
+            legend.bg.alpha = 0.7,
+            legend.text.size = 0.6,
+            legend.title.size = 0.75)
+
+
+# Calculating the average slope around each mound coordinate using buffers with a radius of 1 meter
+mound_data$slope <- raster::extract(slope_raster, mound_data, buffer = 1, fun = mean)
+
+# Removing mounds with NA slope values
+mound_data <- subset(mound_data, !is.na(mound_data$slope))
+```
+
+It would have been nice to average the slope across a larger area in order to capture a more robust measure of the landscape slope. Even better would be to weight the buffer according to mound height in order to average slope across more land area for larger mounds and less land area for tiny mounds. However, as buffers cannot overlap and since some mounds are located extremely close to each other, this would result in a lot of NAs.
+
+## Plotting the health of slope on burial mound health
+In order to visually inspect whether an increase in ground slope systematically leads to more deterioration, the health scores (Likert scale) of the mounds are plotted against the calculated slope scores.
+```{r}
+# Plotting the health of the mounds against the average slope of the landscape around the mounds 
+ggplot()+
+  geom_point(data = mound_data, aes(x = slope, y= Condition), size=3, colour = "#5F7E9C", shape = 21)+
+  theme_classic()+
+  labs(title = "Mound Health over Slope", x = "Slope", y = "Mound Health")+
+  theme(legend.position="none")
+```
+
+¨
