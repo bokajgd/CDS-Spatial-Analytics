@@ -167,7 +167,7 @@ ggplot(data = mound_data, aes(x = slope, y= Condition, fill = Condition))+
   theme(legend.position="none") +
   my_theme
 ```
-At first glance there does not seem to be a noteworthy effect of ground slope on the health of the mounds. In other words, there is no indication that a mound located on more sloped ground leads to more deterioration and wear. However, interpreting a plot containing a continual variable on the x-axis an ordinal variable on the y-axis is difficult and should not alone form the basis of a quantitative analysis. Instead we can run a ordinal logistic regression on the data to quanitfy the effects of ground slope.
+<br> At first glance there does not seem to be a noteworthy effect of ground slope on the health of the mounds. In other words, there is no indication that a mound located on more sloped ground leads to more deterioration and wear. However, interpreting a plot containing a continual variable on the x-axis an ordinal variable on the y-axis is difficult and should not alone form the basis of a quantitative analysis. Instead we can run a ordinal logistic regression on the data to quanitfy the effects of ground slope.
 
 ## Ordinal logistic regression
 ```{r}
