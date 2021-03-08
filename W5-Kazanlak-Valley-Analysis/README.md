@@ -11,10 +11,10 @@ A HTML rendered version of the markdown can be found in the file *W5-Kazalnak-Va
 # Data
 All the necessary data files are located in the *data* folder. <br>
 
-Data: 
+Data used: 
 - Aster.tif: A digital elevation map of the Kazalnak Valley
-- KAZ_mounds: A shapefile containing the GPS coordinates of the locations of the marked burial mounds
-- KAT_mdata: Meta-data on the burial mounds containing e.g. information on health status
+- KAZ_mounds.shp: A shapefile containing the GPS coordinates of the locations of the marked burial mounds
+- KAT_mdata.csv: Meta-data on the burial mounds containing e.g. information on health status
 
 
 # Download folder locally
