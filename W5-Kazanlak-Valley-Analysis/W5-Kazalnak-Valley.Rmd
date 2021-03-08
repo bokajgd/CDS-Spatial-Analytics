@@ -21,7 +21,7 @@ Design a study to evaluate direct or indirect impacts on burial mounds. You can 
 - Take one or more questions and elaborate it into a study using spatial operations on vector and raster.
 
 # My task:
-## Analysing the impact of ground slope on the health of burial mounds in Kazalnak Valley
+## Analysing the impact of the slope of the landscape on the health of burial mounds in Kazalnak Valley
 In this short study, I wish to investigate whether the slope of the landscape under and around a burial mound has a impact on the deterioration of the mound. Landscapes with severe slopes are more exposed to wind and flowing water after rain and mounds located in such terrain may, hence, deteriorate faster.
 
 ```{r packages, include=FALSE}
@@ -32,20 +32,25 @@ In this short study, I wish to investigate whether the slope of the landscape un
 library(pacman)
 
 pacman::p_load(tidyverse,
+               MASS,
                dplyr,
                tmap,
                rasterVis,
                sf,
-               raster)
+               raster,
+               readr,
+               tidyr,
+               ggplot2,
+               RColorBrewer)
 ```
 
 ## Loading the data
-Data: 
-- Aster.tif: A digital elevation map of the Kazalnak Valley
-- KAZ_mounds: A shapefile containing the GPS coordinates of the locations of the marked burial mounds
-- KAT_mdata: Meta-data on the burial mounds containing e.g. information on health status
+Data: <br>
+- Aster.tif: A digital elevation map of the Kazalnak Valley <br>
+- KAZ_mounds.shp: A shapefile containing the GPS coordinates of the locations of the marked burial mounds <br>
+- KAT_mdata.csv: Meta-data on the burial mounds containing e.g. information on health status <br>
 
-```{r loading data }
+```{r loading data, results='hide' }
 # Loading data files
 kaz_elevation_map <- raster("data/aster.tif")
 mound_coordinates <-  st_read("data/KAZ_mounds.shp")
@@ -111,7 +116,7 @@ slope_raster = terrain(kaz_elevation_map_cropped, opt='slope', unit='degrees', n
 # Mapping the mound locations on the slope raster
 tm_shape(slope_raster)+
   tm_raster(title = "Slope in degrees")+
-  tm_shape(high_slope)+
+  tm_shape(mound_data)+
   tm_markers(size = 0.1)+
   tm_scale_bar()+
   tm_layout(main.title = "Mound locations", 
@@ -134,12 +139,58 @@ It would have been nice to average the slope across a larger area in order to ca
 ## Plotting the health of slope on burial mound health
 In order to visually inspect whether an increase in ground slope systematically leads to more deterioration, the health scores (Likert scale) of the mounds are plotted against the calculated slope scores.
 ```{r}
-# Plotting the health of the mounds against the average slope of the landscape around the mounds 
-ggplot()+
-  geom_point(data = mound_data, aes(x = slope, y= Condition), size=3, colour = "#5F7E9C", shape = 21)+
-  theme_classic()+
-  labs(title = "Mound Health over Slope", x = "Slope", y = "Mound Health")+
-  theme(legend.position="none")
-```
+# Setting personalised theme because I love playing with the aesthetics
+my_theme = theme(
+text = element_text(size = 10),
+axis.title.x = element_text(size = 16),
+axis.title.y = element_text(size = 16),
+axis.text = element_text(size = 14),
+axis.text.x = element_text(angle = 45, vjust = 0.5),
+plot.title = element_text(lineheight=.8, face="bold", size = 16),
+panel.border = element_blank(),
+panel.grid.minor = element_blank(),
+panel.grid.major = element_blank(),
+axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
+axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
 
+# Setting the condition data as factors
+mound_data$Condition <- as.factor(mound_data$Condition)
+
+# Plotting the health of the mounds against the average slope of the landscape around the mounds 
+ggplot(data = mound_data, aes(x = slope, y= Condition, fill = Condition))+
+  geom_violin(alpha = .7, position = position_nudge(x = .2, y = 0))+
+  geom_point(size=2, colour = "#5F7E9C", shape = 21 , position = position_jitter(height = 0.2), alpha = 0.5)+
+  theme_classic()+ # White background
+  labs(title = "Mound Health over Slope", x = "Slope", y = "Mound Health")+
+  scale_color_brewer(palette = "Spectral") +
+  scale_fill_brewer(palette = "Spectral") +
+  theme(legend.position="none") +
+  my_theme
+```
+At first glance there does not seem to be a noteworthy effect of ground slope on the health of the mounds. In other words, there is no indication that a mound located on more sloped ground leads to more deterioration and wear. However, interpreting a plot containing a continual variable on the x-axis an ordinal variable on the y-axis is difficult and should not alone form the basis of a quantitative analysis. Instead we can run a ordinal logistic regression on the data to quanitfy the effects of ground slope.
+
+## Ordinal logistic regression
+```{r}
+# Fitting the ordinal logistic regression using the polr() function from the MASS package
+ordinal_log_reg_slope <- MASS::polr(Condition ~ slope, data = mound_data, Hess=TRUE)
+
+# Showing model summmry
+summary(ordinal_log_reg_slope)
+
+# Extracting coefficients table
+coef_table <- coef(summary(ordinal_log_reg_slope))
+
+# Obtaining the odds ratio (exponentiation the estimate)
+OR = exp(coef(ordinal_log_reg_slope))
+OR
+
+# Obtaining the 95% confidence intervals for the odds ratio
+ci <- confint(ordinal_log_reg_slope)
+OR_ci <- exp(ci) # Exponentiating the estimate confidence interval to get the odds ratio confidence interval
+OR_ci # If 1 is included in the interval, the effect is not 'statistically significant'
+```
+### Concluding remarks
+The odds ratio of 1,043 shows that for every unit (1 degree) the slope of the landscape around/beneath the burial mound increases, the burial mounds is 4,3% *more* likely to be in a worse condition. However, as the odds ratio-confidence interval spans 1, the effect is not significantly significant. This analysis merely examines the effects of a single independent variable and there are a multitude of other factors that may influence the health of the burial mounds. Besides spatial attributes meteorological data on e.g. precipitation would also be highly interesting to study. If one was to include more variables for analysis, it would also be relevant to search for interaction effects between one or more variables.
+<br>
+Note that the regression was performed without investigating whether the underlying assumptions were upheld.
 ¨
