@@ -14,7 +14,7 @@ All the necessary data files are located in the *data* folder. <br>
 Data used: 
 - *KAZ_mounds.shp*: A shapefile containing the GPS coordinates of the locations of the marked burial mounds
 <br>
-Outputs:
+Outputs: <br>
 - *mound_locations.jpeg*: A simple plot of the mound locations (scale is irrelevant)
 - *csr_analysis_plot.jpeg*: A plot of the estimated K-function against the theoretical K-function for a completely spatially random distribution (including shaded envelope)
 
