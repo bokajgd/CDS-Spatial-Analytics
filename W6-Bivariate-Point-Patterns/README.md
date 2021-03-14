@@ -12,11 +12,11 @@ A HTML rendered version of the markdown can be found in the file *W6-Bivariate-P
 All the necessary data files are located in the *data* folder. <br>
 
 Data used: 
-- *KAZ_mounds.shp*: A shapefile containing the GPS coordinates of the locations of the marked burial mounds
+- KAZ_mounds.shp: A shapefile containing the GPS coordinates of the locations of the marked burial mounds
 <br>
 Outputs: <br>
-- *mound_locations.jpeg*: A simple plot of the mound locations (scale is irrelevant)
-- *csr_analysis_plot.jpeg*: A plot of the estimated K-function against the theoretical K-function for a completely spatially random distribution (including shaded envelope)
+- mound_locations.jpeg: A simple plot of the mound locations (scale is irrelevant) <br>
+- csr_analysis_plot.jpeg: A plot of the estimated K-function against the theoretical K-function for a completely spatially random distribution (including shaded envelope)
 
 ## Conclusion
 The final plot (*mound_locations.jpeg*) shows the estimated K-function for the spatial distribution of the mounds along with an 'envelope' that the estimated K-function should statistically be confined within if they are truly randomly distributed. When assessing this plot, it is evident that the estimated K-function deviates greatly from the flat theoretical line as well as the statistical 'envelope'. This serves as statistical evidence that the mounds are not completely randomly distributed. By viewing the plot of the mound locations (*mound_locations.jpeg*) it is evident that the mounds are to a large degree clustered and especially one large, dense cluster of mounds is visible in the top right corner.
