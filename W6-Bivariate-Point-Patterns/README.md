@@ -1,4 +1,4 @@
-# W6 - Analysing the spatial distribution of burial mounds in Kazalnak 
+# W6 - Analysing the spatial distribution of burial mounds in Kazalnak Valley
 # Overview 
 
 **Jakob Grøhn Damgaard, March 2021** <br/>
@@ -11,7 +11,7 @@ A HTML rendered version of the markdown can be found in the file *W6-Bivariate-P
 # Data
 All the necessary data files are located in the *data* folder. <br>
 
-Data used: 
+Data used: <br>
 - KAZ_mounds.shp: A shapefile containing the GPS coordinates of the locations of the marked burial mounds
 <br>
 Outputs: <br>
