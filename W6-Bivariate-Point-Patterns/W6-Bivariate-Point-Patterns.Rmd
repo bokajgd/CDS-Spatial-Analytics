@@ -1,0 +1,69 @@
+---
+title: "W6-Bivariate-Point-Patterns"
+author: "Jakob Grøhn Damgaard"
+date: "3/14/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Analysing the spatial distribution of burial mounds in Kazalnak Valley
+In this assignment I intend to analyse the distribution patterns of burial mounds in the Kazalnak Valley. More specifically, I wish to check for complete spatial randomness in the mound locations (CSR Hypothesis) using the K-function.
+
+```{r Loading packages, include = FALSE}
+#install.packages("pacman") # Uncomment this line if pacman is not installed locally
+pacman::p_load(spatstat, tidyverse, ggplot2,sf)
+```
+
+
+## Loading data and converting to ppp object
+Data: <br>
+- KAZ_mounds.shp: A shapefile containing the GPS coordinates of the locations of the marked burial mounds <br>
+```{r Loading data}
+# Loading shapefile
+mound_coordinates <-  st_read("data/KAZ_mounds.shp")
+
+# Converting to ppp object
+mound_coordinates <- as.ppp(mound_coordinates)
+
+# Unifying label of all mounds (some were labelled 'mound' and some 'mound?')
+marks(mound_coordinates, dfok=TRUE, drop=TRUE) <- NA
+
+# Plotting the points
+plot(mound_coordinates, main = "Mound locations")
+
+# Code to save image
+# jpeg(file="mound_locations.jpeg")
+# plot(mound_coordinates, main = "Mound locations")
+# dev.off()
+```
+
+
+## Analysing distribution and plotting results
+The K-function is defined as the expected number of points within a distance of a point of the process, scaled by the intensity. This value can be computed theoretically for a uniform Poisson point generation process (which produces a complete spatially random (CSR) distribution of points) and is equal to `K(r) = pi * r ^ 2` where `r` is equal to the radius of a circle around a point (meaning that the value is equal to the area of a circle  with the specified radius). Deviation from `pi * r ^ 2` can indicate clustering or point inhibition.
+```{r}
+# Estimate the K-function for the mound points
+mounds_K <- Kest(mound_coordinates, correction = "border")
+
+# Plotting the estimated K-function against the theoretical function (K(r)) for a CSR distribution. The default plot shows quadratic growth
+plot(mounds_K, . ~ r, main = "Weighted number of points within a given radius", xlab = "Radius")
+
+# Subtracting pi * r ^ 2 from the y-axis to project the K(r) down on to the x-axis. This makes it easier to asses whether the mound points K-function estimate deviates from the K(r).
+plot(mounds_K, . - pi * r^2 ~ r, main = "Weighted number of points within a given radius (flattened)", xlab = "Radius")
+
+# Simulating 99 samples of points (n = number of mounds) using a uniform Poisson process. 
+mounds_K_envelopes <- envelope(mound_coordinates, Kest, correction = "border")
+
+# Using the boundary cases of the estimated K-functions of the simulated samples to create an 'envelope' (akin to a confidence interval) which defines an area that an estimated K-function should likely fall within if the analysed points are completely spatially randomly distributed. Plotting this envelope along with the estimated K-function for the mounds can then be used assess CSR hypothesis for the mounds
+plot(mounds_K_envelopes, . - pi * r ^ 2 ~ r, main = "Weighted number of points within a given radius (flattened)", xlab = "Radius")
+
+# Code to save image
+# jpeg(file="csr_analysis_plot.jpeg")
+# plot(mounds_K_envelopes, . - pi * r ^ 2 ~ r, main = "Weighted number of points within a given radius (flattened)", xlab = "Radius")
+# dev.off()
+```
+
+## Conclusion:
+The final plot (*csr_analysis_plot.jpeg*) shows the estimated K-function for the spatial distribution of the mounds along with an 'envelope' that the estimated K-function should statistically be confined within if they are truly randomly distributed. When assessing this plot, it is evident that the estimated K-function deviates greatly from the flat theoretical line as well as the statistical 'envelope'. This serves as statistical evidence that the mounds are not completely randomly distributed. By viewing the plot of the mound locations (*mound_locations.jpeg*) it is evident that the mounds are to a large degree clustered and especially one large, dense cluster of mounds is visible in the top right corner.
