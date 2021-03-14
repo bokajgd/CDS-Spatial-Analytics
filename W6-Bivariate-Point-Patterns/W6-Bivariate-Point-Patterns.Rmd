@@ -21,7 +21,7 @@ pacman::p_load(spatstat, tidyverse, ggplot2,sf)
 ## Loading data and converting to ppp object
 Data: <br>
 - KAZ_mounds.shp: A shapefile containing the GPS coordinates of the locations of the marked burial mounds <br>
-```{r Loading data}
+```{r Loading data, results= 'hide', warning = FALSE, message = FALSE}
 # Loading shapefile
 mound_coordinates <-  st_read("data/KAZ_mounds.shp")
 
@@ -30,7 +30,8 @@ mound_coordinates <- as.ppp(mound_coordinates)
 
 # Unifying label of all mounds (some were labelled 'mound' and some 'mound?')
 marks(mound_coordinates, dfok=TRUE, drop=TRUE) <- NA
-
+```
+```{r Plotting points, warning = FALSE, message = FALSE}
 # Plotting the points
 plot(mound_coordinates, main = "Mound locations")
 
@@ -41,9 +42,10 @@ plot(mound_coordinates, main = "Mound locations")
 ```
 
 
+
 ## Analysing distribution and plotting results
 The K-function is defined as the expected number of points within a distance of a point of the process, scaled by the intensity. This value can be computed theoretically for a uniform Poisson point generation process (which produces a complete spatially random (CSR) distribution of points) and is equal to `K(r) = pi * r ^ 2` where `r` is equal to the radius of a circle around a point (meaning that the value is equal to the area of a circle  with the specified radius). Deviation from `pi * r ^ 2` can indicate clustering or point inhibition.
-```{r}
+```{r Analysing and plotting results, warning = FALSE, message = FALSE}
 # Estimate the K-function for the mound points
 mounds_K <- Kest(mound_coordinates, correction = "border")
 
