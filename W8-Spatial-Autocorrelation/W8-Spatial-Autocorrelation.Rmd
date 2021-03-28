@@ -1,0 +1,71 @@
+---
+title: "Untitled"
+author: "Jakob Grøhn Damgaard"
+date: "3/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(rmdformats)
+## Global options
+options(max.print="75")
+opts_chunk$set(echo=TRUE,
+	             cache=TRUE,
+               prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+opts_knit$set(width=75)
+```
+
+```{r loading packages, include=FALSE}
+# Loading libraries
+library(raster)
+library(rgeos)
+library(sf)
+library(tidyverse)
+library(htmltools)
+library(googlesheets4)
+library(mapview)
+```
+
+# Spatial Autocorrelation
+The purpose of this script is to analyse and check for spatial autocorrelation of the distribution of single women in Denmark. The analysis is performed at a municipality level.
+<br>
+
+## Loading data
+Loading in both the map containing municipality multipolygons and civilstatus data for Danish citizens.
+```{r loading data}
+# Load data fir the Danish municipalities
+mun_sp <- readRDS("data/gadm36_DNK_2_sp.rds")
+# Transform to an sf object
+mun_sf <- st_as_sf(mun_sp)
+# Convert CRS
+mun <- st_transform(mun_sf, crs = 32632)
+# Plotting the municipalities to interactive map using mapview()
+mapview(mun)
+
+# Changing some of the names in order to merge data sets later
+sort(mun$NAME_2)
+which(grepl("Å",mun$NAME_2))
+which(grepl("Vest",mun$NAME_2))
+mun$NAME_2[31] <- "Aarhus"
+mun$NAME_2[21] <- "Høje-Taastrup"
+mun$NAME_2[60] <- "Vesthimmerlands"
+
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+# Loading data on the civilstatus of Danish citizens
+civilstatus
+```
+
+## Including Plots
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
