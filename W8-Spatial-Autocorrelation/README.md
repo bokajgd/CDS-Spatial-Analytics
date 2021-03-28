@@ -1,28 +1,27 @@
-# W6 - Analysing the spatial distribution of burial mounds in Kazalnak Valley
+# W8 - Spatial Autocorrelation
 # Overview 
 
 **Jakob Grøhn Damgaard, March 2021** <br/>
-This repository contains the W6 assignment for the course *Spatial Analytics*
+This repository contains the W8 assignment for the course *Spatial Analytics*
+<br>
+The purpose of this project is to analyse and check for spatial autocorrelation in the distribution of unmarried men in Denmark in 2020. The spatial analysis is performed at a municipality level using Moran's I test.
 
 # Code
-The code to execute the tasks can be found in the files *W6-Bivariate-Point-Patterns.Rmd*<br/>
-A HTML rendered version of the markdown can be found in the file *W6-Bivariate-Point-Patterns.html* <br/>
+The code to execute the tasks can be found in the files *W8-Spatial-Autocorrelation.Rmd*<br/>
+A HTML rendered version of the markdown can be found in the file *W8-Spatial-Autocorrelation.html* <br/>
 
 # Data and outputs
 All the necessary data files are located in the *data* folder. <br>
 
 Data used: <br>
-**KAZ_mounds.shp**: A shapefile containing the GPS coordinates of the locations of the marked burial mounds
+**data/gadm36_DNK_2_sp.rds**: An *.rds* containing multipolygons of all Danish municpalities
+**civilstatus_DK.csv**: A *.csv* containing data on the civil status of Danish adults on a municipality level
 <br>
-<br>
-From the file, two plots have been saved as *jpeg* files. <br>
-<br>
-Outputs: <br>
-**mound_locations.jpeg**: A simple plot of the mound locations (scale is irrelevant) <br>
-**csr_analysis_plot.jpeg**: A plot of the estimated K-function against the theoretical K-function for a completely spatially random distribution (including shaded envelope)
 
 ## Conclusion
-The final plot (*mound_locations.jpeg*) shows the estimated K-function for the spatial distribution of the mounds along with an 'envelope' that the estimated K-function should statistically be confined within if they are truly randomly distributed. When assessing this plot, it is evident that the estimated K-function deviates greatly from the flat theoretical line as well as the statistical 'envelope'. This serves as statistical evidence that the mounds are not completely randomly distributed. By viewing the plot of the mound locations (*mound_locations.jpeg*) it is evident that the mounds are to a large degree clustered and especially one large, dense cluster of mounds is visible in the top right corner.
+Both the analytical approach and the simulation based approach for analysing the spatial correlation yielded  z-scores (slightly negative ~ -0.006) close to 0 and both scores were not significant (p>0.05). This means that we cannot reject the null hypothesis and, hence, suggests that the distribution of unmarried men in 2020 is not spatially correlated at a municipality level. Thus unmarried men are spatially distributed randomly across Denmark and the are no inter-dependencies across municipality borders. 
+<br>
+It would be interesting to run a similar analysis at a more fine-grained level of geographical tessellation (e.g. zip codes) or with different definitions of neighbours.
 
 
 # Download folder locally
