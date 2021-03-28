@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Spatial Autocorrelation"
 author: "Jakob Grøhn Damgaard"
 date: "3/28/2021"
 output: html_document
@@ -29,15 +29,18 @@ library(tidyverse)
 library(htmltools)
 library(googlesheets4)
 library(mapview)
+library(tmap)
+library(spdep)
+library(cartogram)
 ```
 
-# Spatial Autocorrelation
-The purpose of this script is to analyse and check for spatial autocorrelation of the distribution of single women in Denmark. The analysis is performed at a municipality level.
+# Introduction
+The purpose of this script is to analyse and check for spatial autocorrelation in the distribution of unmarried men in Denmark. The spatial analysis is performed at a municipality level using Moran's I test.
 <br>
 
 ## Loading data
 Loading in both the map containing municipality multipolygons and civilstatus data for Danish citizens.
-```{r loading data}
+```{r loading data, warning=FALSE}
 # Load data fir the Danish municipalities
 mun_sp <- readRDS("data/gadm36_DNK_2_sp.rds")
 # Transform to an sf object
@@ -45,12 +48,14 @@ mun_sf <- st_as_sf(mun_sp)
 # Convert CRS
 mun <- st_transform(mun_sf, crs = 32632)
 # Plotting the municipalities to interactive map using mapview()
-mapview(mun)
+#mapview(mun)
 
 # Changing some of the names in order to merge data sets later
 sort(mun$NAME_2)
 which(grepl("Å",mun$NAME_2))
+which(grepl("Taastrup",mun$NAME_2))
 which(grepl("Vest",mun$NAME_2))
+# Renaming the relevant names
 mun$NAME_2[31] <- "Aarhus"
 mun$NAME_2[21] <- "Høje-Taastrup"
 mun$NAME_2[60] <- "Vesthimmerlands"
@@ -58,14 +63,72 @@ mun$NAME_2[60] <- "Vesthimmerlands"
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 # Loading data on the civilstatus of Danish citizens
-civilstatus
+civilstatus_DK <- read_csv("data/civilstatus_DK.csv")
 ```
 
-## Including Plots
-
-
+## Data pre-processing
+Pre-processing the civilstatus data to make it fit for analysis.
 ```{r pressure, echo=FALSE}
-plot(pressure)
+# Selecting only male 2020 data and removing entrances containing data on a regional level or rows with NA values
+male_civilstatus_DK_2020 <- civilstatus_DK %>% select("Status", "Sex", "Region", "Y2020K1") %>% filter(Sex == "Mænd") %>% filter(!grepl("Region",Region)) %>% drop_na(Region)
+
+# Saving the total population of each municipality in the data set in 2020 in order to calculate the percentage of unmarried
+male_pop2020 <- male_civilstatus_DK_2020 %>% 
+  group_by(Region) %>% 
+  summarize(pop2020 = sum(Y2020K1))
+
+# Merge data sets, keep only unmarried and create new column containing unmarried in percentage of population
+unmarried_men_pr_region <- mun %>% 
+  select(NAME_2) %>% 
+  merge(male_pop2020, by.x = "NAME_2",by.y ="Region") %>% 
+  merge(male_civilstatus_DK_2020, by.x = "NAME_2",by.y ="Region") %>% 
+  group_by(NAME_2, Sex) %>% 
+  filter(Status == "Ugift") %>%
+  mutate(pct_unmarried = Y2020K1/pop2020*100)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+<br> The pre-processing is done. Before proceeding, we should quickly asses whether the data looks alright.
+<br>
+## Investigating the data
+```{r plotting}
+# Investigating the
+unmarried_men_pr_region[1:6,]
+
+# Plotting a map where the unicipalities are colored according to percentage of unmarried men
+ unmarried_men_pr_region %>% 
+  tm_shape() + 
+  tm_polygons("pct_unmarried",
+              title= "Percentage of unmarried men in 2020")
+```
+
+<br> Everything appears to look fine. Aarhus Kommune seems to have an extraordinary high percentage of unmarried men. As a large part of the population consists of students, this is in accordance with our expectations. Now we can proceed to perform the statistical correlation analysis using Moran's I test.
+
+## Spatial Autocorrelation analysis 
+```{r}
+# Simplifying the multipolygon boundaries to minimise compute intensity
+mun_simple <- st_cast(st_simplify(mun, dTolerance = 250), to = "MULTIPOLYGON")
+
+# Create neighbour list following queen adjacency
+nb <- poly2nb(mun_simple$geometry)
+
+# Get center points of each municipality
+mun_centers <- st_coordinates(st_centroid(mun_simple$geometry))
+
+# Plot map with the intermunicipality connections
+plot(mun_simple$geometry); plot(nb, mun_centers, col = "red",add = TRUE)
+
+# Perform analytical Moran I test on percentage of unmarried men in 2020 across the 99 Danish municipalities
+moran.test(unmarried_men_pr_region$pct_unmarried, 
+           nb2listw(nb, style = "W",zero.policy=TRUE),
+           zero.policy=TRUE)
+
+# Perform Moran I test on percentage of unmarried men in 2020 across the 99 Danish municipalities using MC simulations
+moran.mc(unmarried_men_pr_region$pct_unmarried, 
+         nb2listw(nb, zero.policy=TRUE),
+         zero.policy=TRUE, 
+         nsim = 999)
+```
+
+# Conclusion
+Both the analytical approach and the simulation based approach for analysing the spatial correlation yielded  z-scores (slightly negative ~ -0.006) close to 0 and both scores were not significant (p>0.05). This means that we cannot reject the null hypothesis and, hence, suggests that the distribution of unmarried men in 2020 is not spatially correlated at a municipality level. Thus unmarried men are spatially distributed randomly across Denmark and the are no inter-dependencies across municipality borders. <br>
+It would be interesting to run a similar analysis at a more fine-grained level of geographical tessellation (e.g. zip codes) or with different definitions of neighbours.
