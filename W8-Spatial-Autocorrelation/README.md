@@ -14,7 +14,7 @@ A HTML rendered version of the markdown can be found in the file *W8-Spatial-Aut
 All the necessary data files are located in the *data* folder. <br>
 
 Data used: <br>
-**data/gadm36_DNK_2_sp.rds**: An *.rds* containing multipolygons of all Danish municpalities
+**data/gadm36_DNK_2_sp.rds**: An *.rds* containing multipolygons of all Danish municpalities <br>
 **civilstatus_DK.csv**: A *.csv* containing data on the civil status of Danish adults on a municipality level
 <br>
 
